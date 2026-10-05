@@ -1,0 +1,83 @@
+{
+  "name": "pingme",
+  "displayName": "PingMe",
+  "description": "User reminders for VS Code",
+  "version": "0.0.1",
+  "publisher": "Nithin_m_m",
+  "engines": {
+    "vscode": "^1.140.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "pingMe.open",
+        "title": "PingMe: Open Reminders"
+      },
+      {
+        "command": "pingMe.test",
+        "title": "PingMe: Fly Now (Test)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "pingMeBar",
+          "title": "PingMe",
+          "icon": "media/pingme.svg"
+        }
+      ],
+      "panel": [
+        {
+          "id": "pingMePanel",
+          "title": "Sky",
+          "icon": "media/pingme.svg"
+        }
+      ]
+    },
+    "views": {
+      "pingMeBar": [
+        {
+          "type": "webview",
+          "id": "pingMe.manager",
+          "name": "Reminders"
+        }
+      ],
+      "pingMePanel": [
+        {
+          "type": "webview",
+          "id": "pingMe.sky",
+          "name": "Sky"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.140.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "24.x",
+    "typescript-eslint": "^8.61.1",
+    "eslint": "^10.5.0",
+    "typescript": "^6.0.3",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.0.0"
+  },
+  "overrides": {
+    "diff": "^8.0.4",
+    "serialize-javascript": "^7.0.6"
+  }
+}
