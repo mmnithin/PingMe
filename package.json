@@ -21,8 +21,29 @@
         "title": "PingMe: Open Reminders"
       },
       {
-        "command": "pingMe.test",
-        "title": "PingMe: Fly Now (Test)"
+        "command": "pingMe.addReminder",
+        "title": "PingMe: Add Reminder",
+        "icon": "$(add)"
+      },
+      {
+        "command": "pingMe.activateReminder",
+        "title": "PingMe: Activate Reminder",
+        "icon": "$(bell)"
+      },
+      {
+        "command": "pingMe.deactivateReminder",
+        "title": "PingMe: Deactivate Reminder",
+        "icon": "$(bell-slash)"
+      },
+      {
+        "command": "pingMe.deleteReminder",
+        "title": "PingMe: Delete Reminder",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "pingMe.customizeReminder",
+        "title": "PingMe: Customize Reminder",
+        "icon": "$(settings-gear)"
       }
     ],
     "viewsContainers": {
@@ -32,35 +53,59 @@
           "title": "PingMe",
           "icon": "media/pingme.svg"
         }
-      ],
-      "panel": [
-        {
-          "id": "pingMePanel",
-          "title": "Sky",
-          "icon": "media/pingme.svg"
-        }
       ]
     },
     "views": {
       "pingMeBar": [
         {
-          "type": "webview",
-          "id": "pingMe.manager",
-          "name": "Reminders"
-        }
-      ],
-      "pingMePanel": [
-        {
-          "type": "webview",
-          "id": "pingMe.sky",
-          "name": "Sky"
+          "type": "tree",
+          "id": "pingMe.reminders",
+          "name": "Reminders",
+          "icon": "media/pingme.svg"
         }
       ]
-    }
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "pingMe.addReminder",
+          "when": "view == pingMe.reminders",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "pingMe.deactivateReminder",
+          "when": "view == pingMe.reminders && viewItem == reminder-active",
+          "group": "inline"
+        },
+        {
+          "command": "pingMe.activateReminder",
+          "when": "view == pingMe.reminders && viewItem == reminder-inactive",
+          "group": "inline"
+        },
+        {
+          "command": "pingMe.deleteReminder",
+          "when": "view == pingMe.reminders",
+          "group": "inline"
+        },
+        {
+          "command": "pingMe.customizeReminder",
+          "when": "view == pingMe.reminders",
+          "group": "2_configure"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "pingMe.reminders",
+        "contents": "No reminders yet. [Add a reminder](command:pingMe.addReminder)"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
+    "compile": "tsc -p ./ && node scripts/copy-animations.js",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",

@@ -11,6 +11,25 @@ For example if there is an image subfolder under your extension project workspac
 \!\[feature X\]\(images/feature-x.png\)
 
 > Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Create one-time reminders without leaving VS Code. Reminders are stored with your VS Code user data and restored when the extension starts.
+
+Open the PingMe Activity Bar icon, select the add button, then enter a message, delay, sound, and animation type. Choose **No sound** to mute an individual reminder. Each reminder uses one combined visual type: Rocket airplane, Funny warning poster, or Hungry frog. Right-click an existing reminder and choose **PingMe: Customize Reminder** to change its animation, sound, or banner style. Sound choices include bird chirp, arcade fanfare, boing, and no sound; banner styles include classic, comic, and neon. Use the inline bell actions to activate or deactivate a reminder; delete removes it.
+
+When a reminder is due, PingMe attempts to play its selected sound and runs its chosen animation in a temporary VS Code editor-area tab: the airplane tows a banner, the warning poster carries the reminder with a hard-coded joke, or the frog hops over and eats the reminder box. Use the visible **Play sound** button if VS Code blocks automatic playback; after playing, it becomes **Play again**. The reminder is then marked inactive. Reminders due together play one at a time. Reactivating an overdue reminder prompts for a new delay.
+
+The card closes automatically when its flight finishes. VS Code extensions cannot draw custom floating overlays on top of the editor, so the animation uses a temporary webview tab.
+
+## Source structure
+
+- `src/extension.ts` wires VS Code activation, commands, reminder creation/customization, and the webview flight queue.
+- `src/reminders/model.ts` defines the reminder and animation types.
+- `src/reminders/options.ts` centralizes reminder defaults, presets, storage key, and normalization helpers.
+- `src/reminders/animationPicker.ts` owns the animation-choice picker and reads from the shared animation catalog.
+- `src/reminders/soundPicker.ts` owns the per-reminder sound picker, including its no-sound choice.
+- `src/reminders/animations/` contains one self-contained HTML template per animation; the compile step copies these templates into the extension output.
+- `src/reminders/animationRenderer.ts` loads the selected HTML template and safely fills in reminder data.
+- `src/reminders/scheduler.ts` owns reminder timers and due-time handling.
+- `src/reminders/treeView.ts` implements the reminders tree and its refresh lifecycle.
 
 ## Requirements
 

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-{{nonce}}';">
+	<style>
+		:root { color-scheme: light dark; font-family: var(--vscode-font-family); color: var(--vscode-foreground); background: var(--vscode-editor-background); }
+		body { margin: 0; min-height: 100vh; overflow: hidden; background: var(--vscode-editor-background); }
+		.flight { position: absolute; inset: 0; width: 100vw; height: 100vh; }
+		.snack { position: absolute; top: 50%; left: 50%; width: min(520px, calc(100vw - 32px)); box-sizing: border-box; padding: 24px; border: 3px solid var(--vscode-panel-border); border-radius: 14px; background: var(--vscode-editorWidget-background); box-shadow: 0 12px 36px #0008; transform: translate(-50%, -50%); animation: snack-eaten {{duration}}ms linear both; }
+		.snack-label { margin-bottom: 8px; color: var(--vscode-textLink-foreground); font-size: 12px; font-weight: 700; letter-spacing: .12em; }
+		.snack-message { font-size: clamp(18px, 3vw, 28px); font-weight: 650; line-height: 1.4; overflow-wrap: anywhere; white-space: pre-wrap; }
+		.frog-character { position: absolute; z-index: 2; top: 50%; left: 0; width: 150px; height: 120px; filter: drop-shadow(0 8px 6px #0006); animation: frog-hop {{duration}}ms cubic-bezier(.45, 0, .6, 1) both; }
+		.status { position: fixed; bottom: 16px; left: 16px; color: var(--vscode-descriptionForeground); font-size: 12px; }
+		.replay { margin-left: 8px; padding: 4px 8px; border: 1px solid var(--vscode-button-border, transparent); border-radius: 4px; color: var(--vscode-button-foreground); background: var(--vscode-button-background); font: inherit; cursor: pointer; }
+		.replay:hover { background: var(--vscode-button-hoverBackground); }
+		@keyframes frog-hop {
+			0% { transform: translate(-150px, 120px) scale(.75) rotate(-8deg); }
+			18% { transform: translate(12vw, 10px) scale(.9) rotate(0); }
+			32% { transform: translate(28vw, -100px) scale(1) rotate(-8deg); }
+			44% { transform: translate(43vw, -34px) scale(1.05) rotate(5deg); }
+			53% { transform: translate(50vw, 12px) scale(1.1) rotate(0); }
+			62% { transform: translate(59vw, 25px) scale(.95) rotate(4deg); }
+			76% { transform: translate(76vw, -92px) scale(1) rotate(-8deg); }
+			100% { transform: translate(calc(100vw + 80px), 90px) scale(.8) rotate(8deg); }
+		}
+		@keyframes snack-eaten {
+			0%, 49% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+			58% { opacity: 1; transform: translate(-50%, -50%) scale(.9) rotate(3deg); }
+			66%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(.05) rotate(18deg); }
+		}
+		@media (prefers-reduced-motion: reduce) { .frog-character, .snack { animation-duration: 1ms; } }
+	</style>
+</head>
+<body>
+	<main class="flight" role="status" aria-live="polite">
+		<section class="snack">
+			<div class="snack-label">FROG-APPROVED REMINDER</div>
+			<div class="snack-message">{{message}}</div>
+		</section>
+		<svg class="frog-character" viewBox="0 0 180 140" role="img" aria-label="A frog hopping to eat the reminder">
+			<path d="M21 104c4-25 27-40 63-39 34 1 55 15 66 40 4 9-5 18-15 15l-23-8c-12 8-40 10-57 2l-20 11c-11 6-21-8-14-21Z" fill="#57c84d" stroke="#247c39" stroke-width="5"/>
+			<path d="M47 73c-4-19 7-32 23-32 13 0 21 12 18 27M99 68c-1-18 9-30 23-28 14 2 20 15 13 31" fill="#72df5d" stroke="#247c39" stroke-width="5"/>
+			<ellipse cx="69" cy="48" rx="10" ry="12" fill="#fff"/><ellipse cx="119" cy="45" rx="10" ry="12" fill="#fff"/>
+			<circle cx="72" cy="50" r="4" fill="#202020"/><circle cx="122" cy="47" r="4" fill="#202020"/>
+			<path d="M69 91c17 13 39 14 58 1" fill="none" stroke="#174f2c" stroke-width="5" stroke-linecap="round"/>
+			<path d="m37 105-19 7m118-6 19 8" stroke="#247c39" stroke-width="7" stroke-linecap="round"/>
+			<path d="m82 20-7-10m37 9 6-11" stroke="#247c39" stroke-width="4" stroke-linecap="round"/>
+		</svg>
+	</main>
+	<div class="status" id="status" aria-live="polite">
+		<span id="audio-status"></span>
+		<button class="replay" id="replay" type="button">Play sound</button>
+	</div>
+	<script nonce="{{nonce}}">
+		const sound = {{sound}};
+		const status = document.getElementById('audio-status');
+		const replay = document.getElementById('replay');
+		const playSound = async () => {
+			if (sound === 'silent') {
+				status.textContent = 'This reminder is set to no sound.';
+				replay.hidden = true;
+				return;
+			}
+			try {
+				const audio = new AudioContext();
+				await audio.resume();
+				if (audio.state !== 'running') throw new Error('Audio playback is not enabled.');
+				const now = audio.currentTime;
+				const tone = (frequency, offset, duration, wave = 'sine', endFrequency = frequency) => {
+					const oscillator = audio.createOscillator();
+					const volume = audio.createGain();
+					oscillator.type = wave;
+					oscillator.frequency.setValueAtTime(frequency, now + offset);
+					oscillator.frequency.exponentialRampToValueAtTime(endFrequency, now + offset + duration);
+					volume.gain.setValueAtTime(0.0001, now + offset);
+					volume.gain.exponentialRampToValueAtTime(0.12, now + offset + 0.02);
+					volume.gain.exponentialRampToValueAtTime(0.0001, now + offset + duration);
+					oscillator.connect(volume);
+					volume.connect(audio.destination);
+					oscillator.start(now + offset);
+					oscillator.stop(now + offset + duration);
+				};
+				if (sound === 'chirp') {
+					tone(880, 0, 0.18, 'sine', 1180);
+					tone(1180, 0.2, 0.24, 'sine', 940);
+				} else if (sound === 'boing') {
+					tone(300, 0, 0.42, 'triangle', 900);
+				} else {
+					[523, 659, 784, 1047].forEach((frequency, index) => tone(frequency, index * 0.13, 0.2, 'triangle'));
+				}
+				status.textContent = '';
+				replay.textContent = 'Play again';
+				setTimeout(() => audio.close(), 1200);
+			} catch {
+				status.textContent = 'Sound was blocked. Click to play.';
+				replay.textContent = 'Play sound';
+			}
+		};
+		replay.addEventListener('click', () => void playSound());
+		void playSound();
+	</script>
+</body>
+</html>
