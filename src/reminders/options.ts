@@ -1,6 +1,7 @@
 import type { AnimationTypeId, MessageStyleId, Reminder, SoundId } from './model';
 
 export const reminderStorageKey = 'pingme.reminders';
+export const screenTimeStorageKey = 'pingme.screenTimeReminders';
 export const maximumTimerDelay = 2_147_000_000;
 export const maximumDelayMinutes = 525_600;
 export const reminderFlightDuration = 20_000;

@@ -44,6 +44,26 @@
         "command": "pingMe.customizeReminder",
         "title": "PingMe: Customize Reminder",
         "icon": "$(settings-gear)"
+      },
+      {
+        "command": "pingMe.addScreenTimeReminder",
+        "title": "PingMe: Add Screen Time Interval",
+        "icon": "$(watch)"
+      },
+      {
+        "command": "pingMe.activateScreenTimeReminder",
+        "title": "PingMe: Resume Screen Time Interval",
+        "icon": "$(play)"
+      },
+      {
+        "command": "pingMe.deactivateScreenTimeReminder",
+        "title": "PingMe: Pause Screen Time Interval",
+        "icon": "$(debug-pause)"
+      },
+      {
+        "command": "pingMe.deleteScreenTimeReminder",
+        "title": "PingMe: Delete Screen Time Interval",
+        "icon": "$(trash)"
       }
     ],
     "viewsContainers": {
@@ -62,6 +82,12 @@
           "id": "pingMe.reminders",
           "name": "Reminders",
           "icon": "media/pingme.svg"
+        },
+        {
+          "type": "tree",
+          "id": "pingMe.screenTime",
+          "name": "Screen Time",
+          "icon": "$(watch)"
         }
       ]
     },
@@ -70,6 +96,11 @@
         {
           "command": "pingMe.addReminder",
           "when": "view == pingMe.reminders",
+          "group": "navigation"
+        },
+        {
+          "command": "pingMe.addScreenTimeReminder",
+          "when": "view == pingMe.screenTime",
           "group": "navigation"
         }
       ],
@@ -93,6 +124,21 @@
           "command": "pingMe.customizeReminder",
           "when": "view == pingMe.reminders",
           "group": "2_configure"
+        },
+        {
+          "command": "pingMe.deactivateScreenTimeReminder",
+          "when": "view == pingMe.screenTime && viewItem == screen-time-active",
+          "group": "inline"
+        },
+        {
+          "command": "pingMe.activateScreenTimeReminder",
+          "when": "view == pingMe.screenTime && viewItem == screen-time-inactive",
+          "group": "inline"
+        },
+        {
+          "command": "pingMe.deleteScreenTimeReminder",
+          "when": "view == pingMe.screenTime",
+          "group": "inline"
         }
       ]
     },
@@ -100,6 +146,10 @@
       {
         "view": "pingMe.reminders",
         "contents": "No reminders yet. [Add a reminder](command:pingMe.addReminder)"
+      },
+      {
+        "view": "pingMe.screenTime",
+        "contents": "No screen-time intervals yet. [Add an interval](command:pingMe.addScreenTimeReminder)"
       }
     ]
   },

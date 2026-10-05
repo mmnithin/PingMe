@@ -17,11 +17,16 @@ Open the PingMe Activity Bar icon, select the add button, then enter a message, 
 
 When a reminder is due, PingMe attempts to play its selected sound and runs its chosen animation in a temporary VS Code editor-area tab: the airplane tows a banner, the warning poster carries the reminder with a hard-coded joke, or the frog hops over and eats the reminder box. Use the visible **Play sound** button if VS Code blocks automatic playback; after playing, it becomes **Play again**. The reminder is then marked inactive. Reminders due together play one at a time. Reactivating an overdue reminder prompts for a new delay.
 
+Use the separate **Screen Time** list to add recurring break reminders. Choose a message, interval in minutes, and sound; each active reminder repeats at its interval until paused or deleted. Use the inline pause and resume actions to control an interval.
+
 The card closes automatically when its flight finishes. VS Code extensions cannot draw custom floating overlays on top of the editor, so the animation uses a temporary webview tab.
 
 ## Source structure
 
-- `src/extension.ts` wires VS Code activation, commands, reminder creation/customization, and the webview flight queue.
+- `src/extension.ts` is the small composition root that wires the feature controllers together.
+- `src/reminders/reminderController.ts` owns one-time reminder creation, customization, persistence, and commands.
+- `src/reminders/screenTimeController.ts` owns recurring Screen Time reminder creation, persistence, and commands.
+- `src/reminders/animationController.ts` manages the shared animation queue and reuses the active reminder panel.
 - `src/reminders/model.ts` defines the reminder and animation types.
 - `src/reminders/options.ts` centralizes reminder defaults, presets, storage key, and normalization helpers.
 - `src/reminders/animationPicker.ts` owns the animation-choice picker and reads from the shared animation catalog.
@@ -29,7 +34,9 @@ The card closes automatically when its flight finishes. VS Code extensions canno
 - `src/reminders/animations/` contains one self-contained HTML template per animation; the compile step copies these templates into the extension output.
 - `src/reminders/animationRenderer.ts` loads the selected HTML template and safely fills in reminder data.
 - `src/reminders/scheduler.ts` owns reminder timers and due-time handling.
-- `src/reminders/treeView.ts` implements the reminders tree and its refresh lifecycle.
+- `src/reminders/screenTimeScheduler.ts` schedules recurring screen-time intervals separately from one-time reminders.
+- `src/reminders/reminderTreeView.ts` renders and refreshes the one-time reminders tree.
+- `src/reminders/screenTimeTreeView.ts` renders and refreshes the recurring Screen Time tree.
 
 ## Requirements
 
