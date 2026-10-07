@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { animationTypes, getAnimationType } from './options';
-import type { AnimationTypeId } from './model';
+import { animationTypes, getAnimationType } from '../shared/options';
+import type { AnimationTypeId } from '../shared/model';
 
 export async function pickAnimationType(currentType: AnimationTypeId | undefined): Promise<AnimationTypeId | undefined> {
 	const selection = await vscode.window.showQuickPick(animationTypes.map(option => ({

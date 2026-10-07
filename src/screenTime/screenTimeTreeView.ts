@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getSoundPreset } from './options';
+import { getSoundPreset } from '../shared/options';
 import type { ScreenTimeReminder } from './model';
 
 export class ScreenTimeTreeItem extends vscode.TreeItem {

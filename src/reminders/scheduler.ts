@@ -1,5 +1,5 @@
 import type { Reminder } from './model';
-import { maximumTimerDelay } from './options';
+import { maximumTimerDelay } from '../shared/options';
 
 export class ReminderScheduler {
 	private readonly timers = new Map<string, NodeJS.Timeout>();

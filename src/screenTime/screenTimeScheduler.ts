@@ -1,5 +1,5 @@
 import type { ScreenTimeReminder } from './model';
-import { maximumTimerDelay } from './options';
+import { maximumTimerDelay } from '../shared/options';
 
 export class ScreenTimeScheduler {
 	private readonly timers = new Map<string, NodeJS.Timeout>();

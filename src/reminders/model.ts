@@ -1,6 +1,4 @@
-export type SoundId = 'chirp' | 'arcade' | 'boing' | 'silent';
-export type MessageStyleId = 'classic' | 'comic' | 'neon';
-export type AnimationTypeId = 'rocket' | 'poster' | 'frog';
+import type { AnimationTypeId, MessageStyleId, SoundId } from '../shared/model';
 
 export interface Reminder {
 	id: string;
@@ -10,20 +8,4 @@ export interface Reminder {
 	sound?: SoundId;
 	messageStyle?: MessageStyleId;
 	animationType?: AnimationTypeId;
-}
-
-export interface ReminderFlight {
-	message: string;
-	sound: SoundId;
-	messageStyle: MessageStyleId;
-	animationType: AnimationTypeId;
-}
-
-export interface ScreenTimeReminder {
-	id: string;
-	message: string;
-	intervalMinutes: number;
-	nextDueAt: number;
-	active: boolean;
-	sound?: SoundId;
 }

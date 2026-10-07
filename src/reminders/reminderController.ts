@@ -5,17 +5,17 @@ import {
 	defaultSound,
 	getAnimationType,
 	getMessageStyle,
-	getSoundPreset,
-	maximumDelayMinutes,
-	messageStyles,
-	reminderStorageKey,
-	toReminderFlight
-} from './options';
-import type { Reminder, ReminderFlight } from './model';
+	messageStyles
+} from '../shared/options';
+import { maximumDelayMinutes } from '../shared/options';
+import { reminderStorageKey, toReminderFlight } from './options';
+import type { Reminder } from './model';
+import type { ReminderFlight } from '../shared/model';
 import { pickAnimationType } from './animationPicker';
-import { pickReminderSound } from './soundPicker';
+import { pickReminderSound } from '../shared/soundPicker';
 import { ReminderScheduler } from './scheduler';
 import { ReminderTreeItem, ReminderTreeProvider } from './reminderTreeView';
+import { getSoundPreset } from '../shared/options';
 
 const validateDelay = (value: string): string | undefined => {
 	const minutes = Number(value);

@@ -19,24 +19,19 @@ When a reminder is due, PingMe attempts to play its selected sound and runs its 
 
 Use the separate **Screen Time** list to add recurring break reminders. Choose a message, interval in minutes, and sound; each active reminder repeats at its interval until paused or deleted. Use the inline pause and resume actions to control an interval.
 
+Use **To-dos** for Jira-style task tracking. Add or edit a title and due date, set the current status using the **To do**, **In progress**, or **Done** radio buttons, and delete tasks when they are no longer needed. To-do data is stored separately from reminders.
+
 The card closes automatically when its flight finishes. VS Code extensions cannot draw custom floating overlays on top of the editor, so the animation uses a temporary webview tab.
 
 ## Source structure
 
-- `src/extension.ts` is the small composition root that wires the feature controllers together.
-- `src/reminders/reminderController.ts` owns one-time reminder creation, customization, persistence, and commands.
-- `src/reminders/screenTimeController.ts` owns recurring Screen Time reminder creation, persistence, and commands.
-- `src/reminders/animationController.ts` manages the shared animation queue and reuses the active reminder panel.
-- `src/reminders/model.ts` defines the reminder and animation types.
-- `src/reminders/options.ts` centralizes reminder defaults, presets, storage key, and normalization helpers.
-- `src/reminders/animationPicker.ts` owns the animation-choice picker and reads from the shared animation catalog.
-- `src/reminders/soundPicker.ts` owns the per-reminder sound picker, including its no-sound choice.
-- `src/reminders/animations/` contains one self-contained HTML template per animation; the compile step copies these templates into the extension output.
-- `src/reminders/animationRenderer.ts` loads the selected HTML template and safely fills in reminder data.
-- `src/reminders/scheduler.ts` owns reminder timers and due-time handling.
-- `src/reminders/screenTimeScheduler.ts` schedules recurring screen-time intervals separately from one-time reminders.
-- `src/reminders/reminderTreeView.ts` renders and refreshes the one-time reminders tree.
-- `src/reminders/screenTimeTreeView.ts` renders and refreshes the recurring Screen Time tree.
+- `src/extension.ts` is the composition root; it registers the three list features and shared animation controller.
+- `src/reminders/` contains the one-time reminder list, including its controller, scheduler, tree view, model, and reminder-specific options.
+- `src/screenTime/` contains the recurring Screen Time list, including its controller, scheduler, tree view, model, and storage key.
+- `src/todos/` contains the Jira-style To-dos list, including its controller, model, storage key, and webview.
+- `src/shared/` contains code reused by multiple lists: sound selection, common sound/animation settings and types, and reminder animation infrastructure.
+- `src/shared/animations/` manages the shared animation queue, renders reminder animation HTML, and includes the individual templates in `templates/`.
+- `scripts/copy-animations.js` copies shared animation templates and the To-dos webview into the extension output during compilation.
 
 ## Requirements
 

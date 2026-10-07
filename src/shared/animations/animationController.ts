@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { randomBytes } from 'node:crypto';
 import { renderReminderAnimation } from './animationRenderer';
-import { reminderFlightDuration } from './options';
-import type { ReminderFlight } from './model';
+import { reminderFlightDuration } from '../options';
+import type { ReminderFlight } from '../model';
 
 export class ReminderAnimationController implements vscode.Disposable {
 	private readonly queue: ReminderFlight[] = [];

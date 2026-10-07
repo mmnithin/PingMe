@@ -5,10 +5,11 @@ import {
 	defaultSound,
 	getSoundPreset,
 	maximumDelayMinutes,
-	screenTimeStorageKey
-} from './options';
-import type { ReminderFlight, ScreenTimeReminder } from './model';
-import { pickReminderSound } from './soundPicker';
+} from '../shared/options';
+import { screenTimeStorageKey } from './options';
+import type { ReminderFlight } from '../shared/model';
+import type { ScreenTimeReminder } from './model';
+import { pickReminderSound } from '../shared/soundPicker';
 import { ScreenTimeScheduler } from './screenTimeScheduler';
 import { ScreenTimeTreeItem, ScreenTimeTreeProvider } from './screenTimeTreeView';
 

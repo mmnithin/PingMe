@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'nonce-{{nonce}}';">
+	<style>
+		:root {
+			color-scheme: light dark;
+			font-family: var(--vscode-font-family);
+			color: var(--vscode-foreground);
+			background: var(--vscode-sideBar-background);
+		}
+		body { margin: 0; padding: 12px; background: var(--vscode-sideBar-background); }
+		.toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+		h1 { margin: 0; font-size: 16px; font-weight: 600; }
+		button, input { font: inherit; }
+		button {
+			padding: 5px 10px;
+			border: 1px solid var(--vscode-button-border, transparent);
+			border-radius: 2px;
+			color: var(--vscode-button-foreground);
+			background: var(--vscode-button-background);
+			cursor: pointer;
+		}
+		button:hover { background: var(--vscode-button-hoverBackground); }
+		button.secondary { color: var(--vscode-button-secondaryForeground); background: var(--vscode-button-secondaryBackground); }
+		button.secondary:hover { background: var(--vscode-button-secondaryHoverBackground); }
+		.todo-list { display: grid; gap: 7px; }
+		.todo-card { padding: 9px 10px; border: 1px solid var(--vscode-panel-border); border-radius: 6px; background: var(--vscode-editor-background); }
+		.todo-title { margin: 0 0 3px; font-size: 13px; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+		.due-date { margin-bottom: 8px; color: var(--vscode-descriptionForeground); font-size: 11px; }
+		.status-group { display: flex; flex-wrap: wrap; gap: 6px 8px; margin: 0 0 8px; padding: 0; border: 0; }
+		.status-group legend { margin-bottom: 4px; color: var(--vscode-descriptionForeground); font-size: 11px; }
+		.status-option { display: inline-flex; align-items: center; gap: 4px; padding: 2px 5px; border: 1px solid var(--vscode-panel-border); border-radius: 4px; font-size: 11px; cursor: pointer; }
+		.status-option:hover { background: var(--vscode-list-hoverBackground); }
+		.status-option input { width: 12px; height: 12px; margin: 0; accent-color: var(--vscode-focusBorder); }
+		.actions { display: flex; justify-content: flex-end; gap: 5px; }
+		.actions button { padding: 3px 8px; font-size: 11px; }
+		.editor { margin: 0 0 14px; padding: 12px; border: 1px solid var(--vscode-focusBorder); border-radius: 4px; }
+		.editor[hidden], .empty[hidden], .error[hidden] { display: none; }
+		.editor h2 { margin: 0 0 10px; font-size: 14px; }
+		.field { display: grid; gap: 5px; margin-bottom: 10px; }
+		.field label { color: var(--vscode-descriptionForeground); font-size: 12px; }
+		.field input { box-sizing: border-box; width: 100%; padding: 6px 8px; border: 1px solid var(--vscode-input-border, transparent); border-radius: 2px; color: var(--vscode-input-foreground); background: var(--vscode-input-background); }
+		.editor-actions { display: flex; gap: 8px; }
+		.empty, .error { padding: 12px; color: var(--vscode-descriptionForeground); font-size: 13px; }
+		.error { color: var(--vscode-errorForeground); }
+	</style>
+</head>
+<body>
+	<header class="toolbar">
+		<h1>To-dos</h1>
+		<button id="add" type="button">＋ Add to-do</button>
+	</header>
+	<section id="editor" class="editor" hidden>
+		<h2 id="editor-heading">Add to-do</h2>
+		<form id="todo-form">
+			<input id="todo-id" type="hidden">
+			<div class="field">
+				<label for="title">Title</label>
+				<input id="title" name="title" type="text" maxlength="200" required>
+			</div>
+			<div class="field">
+				<label for="due-date">Due date</label>
+				<input id="due-date" name="dueAt" type="datetime-local" required>
+			</div>
+			<fieldset class="status-group">
+				<legend>Current status</legend>
+				<label class="status-option"><input type="radio" name="status" value="todo" checked> To do</label>
+				<label class="status-option"><input type="radio" name="status" value="inProgress"> In progress</label>
+				<label class="status-option"><input type="radio" name="status" value="done"> Done</label>
+			</fieldset>
+			<div class="editor-actions">
+				<button type="submit">Save</button>
+				<button id="cancel" class="secondary" type="button">Cancel</button>
+			</div>
+		</form>
+	</section>
+	<p id="error" class="error" role="alert" hidden></p>
+	<p id="empty" class="empty" hidden>No to-dos yet. Add one to get started.</p>
+	<section id="todo-list" class="todo-list" aria-live="polite"></section>
+	<script nonce="{{nonce}}">
+		const vscode = acquireVsCodeApi();
+		const list = document.getElementById('todo-list');
+		const empty = document.getElementById('empty');
+		const error = document.getElementById('error');
+		const editor = document.getElementById('editor');
+		const form = document.getElementById('todo-form');
+		const titleInput = document.getElementById('title');
+		const dueDateInput = document.getElementById('due-date');
+		const todoIdInput = document.getElementById('todo-id');
+		const statuses = [
+			{ id: 'todo', label: 'To do' },
+			{ id: 'inProgress', label: 'In progress' },
+			{ id: 'done', label: 'Done' }
+		];
+		let todos = [];
+
+		const localDateTimeValue = timestamp => {
+			const date = new Date(timestamp);
+			const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+			return local.toISOString().slice(0, 16);
+		};
+		const showEditor = todo => {
+			error.hidden = true;
+			form.reset();
+			todoIdInput.value = todo ? todo.id : '';
+			titleInput.value = todo ? todo.title : '';
+			dueDateInput.value = todo ? localDateTimeValue(todo.dueAt) : localDateTimeValue(Date.now() + 86_400_000);
+			const selectedStatus = todo ? todo.status : 'todo';
+			form.querySelector('input[name="status"][value="' + selectedStatus + '"]').checked = true;
+			document.getElementById('editor-heading').textContent = todo ? 'Edit to-do' : 'Add to-do';
+			editor.hidden = false;
+			titleInput.focus();
+		};
+		const makeButton = (label, className, action) => {
+			const button = document.createElement('button');
+			button.type = 'button';
+			button.textContent = label;
+			if (className) button.className = className;
+			button.addEventListener('click', action);
+			return button;
+		};
+		const render = () => {
+			list.replaceChildren();
+			empty.hidden = todos.length !== 0;
+			for (const todo of todos) {
+				const card = document.createElement('article');
+				card.className = 'todo-card';
+				const title = document.createElement('h2');
+				title.className = 'todo-title';
+				title.textContent = todo.title;
+				card.append(title);
+				const dueDate = document.createElement('div');
+				dueDate.className = 'due-date';
+				dueDate.textContent = 'Due ' + new Date(todo.dueAt).toLocaleString();
+				card.append(dueDate);
+				const fieldset = document.createElement('fieldset');
+				fieldset.className = 'status-group';
+				const legend = document.createElement('legend');
+				legend.textContent = 'Current status';
+				fieldset.append(legend);
+				for (const status of statuses) {
+					const label = document.createElement('label');
+					label.className = 'status-option';
+					const radio = document.createElement('input');
+					radio.type = 'radio';
+					radio.name = 'status-' + todo.id;
+					radio.value = status.id;
+					radio.checked = todo.status === status.id;
+					radio.addEventListener('change', () => vscode.postMessage({
+						type: 'setStatus',
+						id: todo.id,
+						status: status.id
+					}));
+					label.append(radio, document.createTextNode(' ' + status.label));
+					fieldset.append(label);
+				}
+				card.append(fieldset);
+				const actions = document.createElement('div');
+				actions.className = 'actions';
+				actions.append(
+					makeButton('Edit', 'secondary', () => showEditor(todo)),
+					makeButton('Delete', 'secondary', () => {
+						if (confirm('Delete "' + todo.title + '"?')) {
+							vscode.postMessage({ type: 'delete', id: todo.id });
+						}
+					})
+				);
+				card.append(actions);
+				list.append(card);
+			}
+		};
+
+		document.getElementById('add').addEventListener('click', () => showEditor(undefined));
+		document.getElementById('cancel').addEventListener('click', () => { editor.hidden = true; });
+		form.addEventListener('submit', event => {
+			event.preventDefault();
+			const selectedStatus = form.querySelector('input[name="status"]:checked');
+			vscode.postMessage({
+				type: todoIdInput.value ? 'update' : 'create',
+				id: todoIdInput.value || undefined,
+				title: titleInput.value.trim(),
+				status: selectedStatus.value,
+				dueAt: new Date(dueDateInput.value).getTime()
+			});
+			editor.hidden = true;
+		});
+		window.addEventListener('message', event => {
+			if (event.data.type === 'state') {
+				todos = event.data.todos;
+				render();
+			} else if (event.data.type === 'error') {
+				error.textContent = event.data.message;
+				error.hidden = false;
+			}
+		});
+		vscode.postMessage({ type: 'ready' });
+	</script>
+</body>
+</html>

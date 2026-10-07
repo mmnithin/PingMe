@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { reminderFlightDuration } from './options';
-import type { ReminderFlight } from './model';
+import { reminderFlightDuration } from '../options';
+import type { ReminderFlight } from '../model';
 
 const escapeHtml = (value: string): string => value.replace(/[&<>"']/g, character => {
 	switch (character) {
@@ -15,7 +15,7 @@ const escapeHtml = (value: string): string => value.replace(/[&<>"']/g, characte
 });
 
 export async function renderReminderAnimation(reminder: ReminderFlight, nonce: string): Promise<string> {
-	const templatePath = join(__dirname, 'animations', `${reminder.animationType}.html`);
+	const templatePath = join(__dirname, 'templates', `${reminder.animationType}.html`);
 	let template: string;
 	try {
 		template = await readFile(templatePath, 'utf8');

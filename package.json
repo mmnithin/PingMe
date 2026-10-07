@@ -88,6 +88,12 @@
           "id": "pingMe.screenTime",
           "name": "Screen Time",
           "icon": "$(watch)"
+        },
+        {
+          "type": "webview",
+          "id": "pingMe.todos",
+          "name": "To-dos",
+          "icon": "$(checklist)"
         }
       ]
     },
@@ -150,6 +156,10 @@
       {
         "view": "pingMe.screenTime",
         "contents": "No screen-time intervals yet. [Add an interval](command:pingMe.addScreenTimeReminder)"
+      },
+      {
+        "view": "pingMe.todos",
+        "contents": "No to-dos yet. Select **Add to-do** to create one."
       }
     ]
   },

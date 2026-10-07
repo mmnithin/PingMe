@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getAnimationType, getMessageStyle, getSoundPreset } from './options';
+import { getAnimationType, getMessageStyle, getSoundPreset } from '../shared/options';
 import type { Reminder } from './model';
 
 export class ReminderTreeItem extends vscode.TreeItem {
